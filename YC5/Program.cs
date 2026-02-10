@@ -8,7 +8,8 @@ using YC5.Interfaces;
 using YC5.Services;
 using OfficeOpenXml;
 
-ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+ExcelPackage.License.SetNonCommercialOrganization("FPT Polytechnic");
 
 var builder = WebApplication.CreateBuilder(args);
 
