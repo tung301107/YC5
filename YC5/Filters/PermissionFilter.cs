@@ -19,31 +19,19 @@ namespace YC5.Filters
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            // 1. Lấy UserId từ Claims trong Token
-            var userIdClaim = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            // 1. Kiểm tra xem user đã đăng nhập chưa
+            if (!context.HttpContext.User.Identity.IsAuthenticated)
             {
                 context.Result = new UnauthorizedResult();
                 return;
             }
 
-            var userId = int.Parse(userIdClaim.Value);
+            // 2. Lấy danh sách các "Permission" đã được dán trong Token
+            var userPermissions = context.HttpContext.User.FindAll("Permission").Select(x => x.Value);
 
-            // 2. Kiểm tra quyền trong DB
-            // Check quyền trực tiếp của User OR Quyền thông qua Role của User đó
-            var hasPermission = await (from uf in _context.UserFunctions
-                                       join f in _context.Functions on uf.FunctionId equals f.Id
-                                       where uf.UserId == userId && f.Code == _functionCode
-                                       select f).AnyAsync()
-                                || await (from ur in _context.UserRoles
-                                          join rf in _context.RoleFunctions on ur.RoleId equals rf.RoleId
-                                          join f in _context.Functions on rf.FunctionId equals f.Id
-                                          where ur.UserId == userId && f.Code == _functionCode
-                                          select f).AnyAsync();
-
-            if (!hasPermission)
+            // 3. So khớp với mã chức năng yêu cầu (ví dụ: STUDENT_VIEW)
+            if (!userPermissions.Contains(_functionCode))
             {
-                // Trả về 403 Forbidden nếu không có quyền
                 context.Result = new ObjectResult("Bạn không có quyền thực hiện chức năng này!")
                 {
                     StatusCode = 403

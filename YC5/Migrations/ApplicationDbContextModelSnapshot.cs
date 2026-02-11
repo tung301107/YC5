@@ -41,44 +41,6 @@ namespace YC5.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Functions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "STUDENT_VIEW",
-                            Name = "Xem danh sách sinh viên"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "STUDENT_CREATE",
-                            Name = "Thêm mới sinh viên"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "STUDENT_UPDATE",
-                            Name = "Cập nhật sinh viên"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "STUDENT_DELETE",
-                            Name = "Xóa sinh viên"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "STUDENT_IMPORT",
-                            Name = "Import sinh viên"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Code = "STUDENT_EXPORT",
-                            Name = "Export sinh viên"
-                        });
                 });
 
             modelBuilder.Entity("YC5.Models.Role", b =>
@@ -96,18 +58,6 @@ namespace YC5.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Administrator"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "User"
-                        });
                 });
 
             modelBuilder.Entity("YC5.Models.RoleFunction", b =>
@@ -121,38 +71,6 @@ namespace YC5.Migrations
                     b.HasKey("RoleId", "FunctionId");
 
                     b.ToTable("RoleFunctions");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            FunctionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            FunctionId = 2
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            FunctionId = 3
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            FunctionId = 4
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            FunctionId = 5
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            FunctionId = 6
-                        });
                 });
 
             modelBuilder.Entity("YC5.Models.Student", b =>
@@ -196,30 +114,6 @@ namespace YC5.Migrations
                         .IsUnique();
 
                     b.ToTable("Students");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Class = "D15-01",
-                            DateOfBirth = new DateTime(2002, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "an.nv@gmail.com",
-                            FullName = "Nguyễn Văn An",
-                            MSSV = "SV001",
-                            Major = "CNTT",
-                            Phone = "0912345678"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Class = "K15-02",
-                            DateOfBirth = new DateTime(2002, 10, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "binh.tt@gmail.com",
-                            FullName = "Trần Thị Bình",
-                            MSSV = "SV002",
-                            Major = "Kế toán",
-                            Phone = "0988776655"
-                        });
                 });
 
             modelBuilder.Entity("YC5.Models.User", b =>
@@ -237,7 +131,7 @@ namespace YC5.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

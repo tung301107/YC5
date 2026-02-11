@@ -12,8 +12,8 @@ using YC5.Data;
 namespace YC5.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260209185813_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260211233204_a")]
+    partial class a
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,26 +44,6 @@ namespace YC5.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Functions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "STUDENT_IMPORT",
-                            Name = "Import Sinh Viên"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "STUDENT_EXPORT",
-                            Name = "Export Sinh Viên"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "STUDENT_VIEW",
-                            Name = "Xem Sinh Viên"
-                        });
                 });
 
             modelBuilder.Entity("YC5.Models.Role", b =>
@@ -154,7 +134,7 @@ namespace YC5.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

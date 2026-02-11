@@ -1,28 +1,30 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models; 
+using Microsoft.OpenApi.Models;
 using System.Text;
 using YC5.Data;
 using YC5.Interfaces;
 using YC5.Services;
 using OfficeOpenXml;
 
-
 ExcelPackage.License.SetNonCommercialOrganization("FPT Polytechnic");
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. C?u h�nh Database ---
+// --- 1. Cấu hình Database ---
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// --- 2. ??ng k� Dependency Injection ---
+// --- 2. Đăng ký Dependency Injection ---
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 
-// --- 3. C?u h�nh JWT Authentication ---
-var key = Encoding.ASCII.GetBytes("DayLaMotChuoiBiMatSieuCapVip123456");
+// --- 3. Cấu hình JWT Authentication ---
+// Lấy Key từ appsettings.json để đồng bộ với AuthService
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var key = Encoding.ASCII.GetBytes(jwtSettings["Key"] ?? "DayLaMotChuoiBiMatSieuCapVip123456");
+
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -37,33 +39,31 @@ builder.Services.AddAuthentication(x =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = false,
-        ValidateAudience = false
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.Zero // Loại bỏ thời gian trễ mặc định của token
     };
 });
 
-// --- 4. C?U H�NH SWAGGER ?? H? TR? JWT ---
+// --- 4. CẤU HÌNH SWAGGER ---
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // Th�ng tin c? b?n c?a API
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "H? th?ng Qu?n l� Sinh vi�n YC5",
+        Title = "Hệ thống Quản lý Sinh viên YC5",
         Version = "v1",
-        Description = "API h? tr? qu?n l� sinh vi�n v� Import/Export Excel"
+        Description = "API hỗ trợ quản lý sinh viên và Import/Export Excel"
     });
 
-    // ??nh ngh?a b?o m?t: Y�u c?u Swagger d�ng Header "Authorization"
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Nh?p Token theo c� ph�p: Bearer {your_token_here}",
+        Description = "Nhập Token theo cú pháp: Bearer {your_token_here}",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
 
-    // �p d?ng c?u h�nh b?o m?t cho t?t c? c�c API trong Swagger
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -84,7 +84,15 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// --- 5. Pipeline HTTP ---
+// --- 5. Khởi tạo Database với Seed Data ---
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    DbInitializer.Initialize(context);
+}
+
+// --- 6. Pipeline HTTP ---
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -95,7 +103,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// L?U �: Authentication ph?i ??ng tr??c Authorization
+// QUAN TRỌNG: Authentication phải đứng trước Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
