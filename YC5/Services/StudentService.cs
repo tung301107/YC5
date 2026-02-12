@@ -121,8 +121,37 @@ namespace YC5.Services
                         errors.Add($"Dòng {row}: Email sai định dạng");
 
                     // Check định dạng ngày sinh
-                    if (!DateTime.TryParse(dobStr, out DateTime dob))
+                    var dobValue = ws.Cells[row, 3].Value;
+                    DateTime dob = DateTime.MinValue;
+                    bool isDateValid = false;
+
+                    if (dobValue is DateTime dt)
+                    {
+                        dob = dt;
+                        isDateValid = true;
+                    }
+                    else if (dobValue is double d)
+                    {
+                        try
+                        {
+                            dob = DateTime.FromOADate(d);
+                            isDateValid = true;
+                        }
+                        catch { }
+                    }
+                    else if (dobValue is string s)
+                    {
+                        string[] formats = { "dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "d/M/yyyy", "M/d/yyyy" };
+                        isDateValid = DateTime.TryParseExact(s.Trim(), formats,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out dob);
+                    }
+
+                    if (!isDateValid)
                         errors.Add($"Dòng {row}: Ngày sinh sai định dạng (Cần dd/MM/yyyy hoặc MM/dd/yyyy)");
+                    
+                    // Gán vào biến dobStr cũ để handle logic nếu cần (hoặc bỏ qua vì đã có biến dob)
+                    // Lưu ý: biến dobStr ở trên line 112 chỉ là ToString() nên không tin cậy.
 
                     // Check trùng MSSV trong DB
                     if (await _context.Students.AnyAsync(s => s.MSSV == mssv))
